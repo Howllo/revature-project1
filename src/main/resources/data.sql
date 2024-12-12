@@ -36,10 +36,9 @@ CREATE TABLE follow (
 );
 
 CREATE TABLE post_like (
-    user_id INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
-    liked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES app_user(id),
+    user_id INTEGER NOT NULL,
     FOREIGN KEY (post_id) REFERENCES post(id),
-    PRIMARY KEY (user_id, post_id)
+    FOREIGN KEY (user_id) REFERENCES app_user(id),
+    PRIMARY KEY (post_id, user_id)
 );

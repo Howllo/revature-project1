@@ -33,7 +33,12 @@ public class Post {
     @Column(name = "post_at", nullable = false)
     private Timestamp postAt;
 
-    @OneToMany(mappedBy = "post")
+    @ManyToMany
+    @JoinTable(
+            name = "post_like",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private Set<AppUser> likes = new HashSet<>();
 
     public Post(AppUser userId, String comment) {

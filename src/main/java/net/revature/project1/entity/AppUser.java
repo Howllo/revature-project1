@@ -33,8 +33,8 @@ public class AppUser {
     @Column(nullable = false)
     private Timestamp created_at;
 
-    @OneToMany(mappedBy = "app_user")
-    private Set<PostLike> likes = new HashSet<>();
+    @ManyToMany(mappedBy = "app_user")
+    private Set<Post> posts = new HashSet<>();
 
     public AppUser() {}
 
