@@ -16,11 +16,13 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "post_parent")
+    @ManyToOne
+    @JoinColumn(name = "parent_post")
     private Post postParent;
 
-    @Column(name = "user_id", nullable = false)
-    private AppUser userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private AppUser user;
 
     private String comment;
 
@@ -41,14 +43,19 @@ public class Post {
     )
     private final Set<AppUser> likes = new HashSet<>();
 
-    public Post(AppUser userId, String comment) {
-        this.userId = userId;
+    public Post() {}
+
+    public Post(AppUser user, String comment) {
+        this.user = user;
         this.comment = comment;
+        this.postAt = new Timestamp(System.currentTimeMillis());
     }
 
-    public Post(AppUser userId, String comment, String imagePath, String videoPath) {
-        this.userId = userId;
+    public Post(AppUser user, String comment, String imagePath, String videoPath) {
+        this.user = user;
+        this.comment = comment;
         this.imagePath = imagePath;
         this.videoPath = videoPath;
+        this.postAt = new Timestamp(System.currentTimeMillis());
     }
 }

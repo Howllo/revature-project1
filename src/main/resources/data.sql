@@ -4,25 +4,23 @@ DROP TABLE IF EXISTS post;
 DROP TABLE IF EXISTS app_user;
 
 CREATE TABLE app_user (
-    id INTEGER auto_increment,
+    id INTEGER auto_increment PRIMARY KEY,
     display_name VARCHAR(20) NOT NULL,
     email VARCHAR(50) NOT NULL,
     username VARCHAR(20) NOT NULL,
     password VARCHAR(100) NOT NULL,
     biography VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP NOT NULL
-    PRIMARY KEY (id)
 );
 
 CREATE TABLE post (
-    id INTEGER auto_increment,
+    id INTEGER auto_increment PRIMARY KEY,
     parent_post INTEGER DEFAULT NULL,
     user_id INTEGER NOT NULL,
     comment VARCHAR(255),
     image_path VARCHAR(255),
     video_path VARCHAR(255),
     post_at TIMESTAMP NOT NULL,
-    PRIMARY KEY (id),
     FOREIGN KEY(parent_post) REFERENCES post(id),
     FOREIGN KEY(user_id) REFERENCES app_user(id)
 );

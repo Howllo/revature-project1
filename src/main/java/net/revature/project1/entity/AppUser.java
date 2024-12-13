@@ -2,6 +2,7 @@ package net.revature.project1.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ public class AppUser {
     private String username;
 
     @Column(nullable = false)
+    @Setter
     private String password;
 
     private String biography;
@@ -41,12 +43,11 @@ public class AppUser {
     )
     private final Set<AppUser> follower = new HashSet<>();
 
-    @ManyToMany(mappedBy = "follow")
+    @ManyToMany(mappedBy = "follower")
     private final Set<AppUser> following = new HashSet<>();
 
-
-    @ManyToMany(mappedBy = "follow")
-    private final Set<Post> posts = new HashSet<>();
+    @ManyToMany(mappedBy = "likes")
+    private final Set<Post> likedPosts = new HashSet<>();
 
     public AppUser() {}
 
@@ -55,5 +56,6 @@ public class AppUser {
         this.email = email;
         this.username = username;
         this.password = password;
+        this.createdAt = new Timestamp(System.currentTimeMillis());
     }
 }

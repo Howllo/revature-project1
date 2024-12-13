@@ -4,10 +4,14 @@ import net.revature.project1.entity.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface AuthRepo extends JpaRepository<AppUser, Long> {
 
-    boolean existByUsername(String username);
+    boolean existsByUsername(String username);
 
-    boolean existByEmail(String email);
+    boolean existsByEmail(String email);
+
+    Optional<AppUser> findAppUserByEmail(String email);
 }
