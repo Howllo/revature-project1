@@ -16,8 +16,8 @@ public class AppUser {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false)
-    private String display_name;
+    @Column(name = "display_name", nullable = false)
+    private String displayName;
 
     @Column(nullable = false)
     private String email;
@@ -30,16 +30,28 @@ public class AppUser {
 
     private String biography;
 
-    @Column(nullable = false)
-    private Timestamp created_at;
+    @Column(name = "created_at", nullable = false)
+    private Timestamp createdAt;
 
-    @ManyToMany(mappedBy = "app_user")
-    private Set<Post> posts = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "follow",
+            joinColumns = @JoinColumn(name = "follower_id"),
+            inverseJoinColumns = @JoinColumn(name ="following_id")
+    )
+    private final Set<AppUser> follower = new HashSet<>();
+
+    @ManyToMany(mappedBy = "follow")
+    private final Set<AppUser> following = new HashSet<>();
+
+
+    @ManyToMany(mappedBy = "follow")
+    private final Set<Post> posts = new HashSet<>();
 
     public AppUser() {}
 
-    public AppUser(String display_name, String email, String username, String password) {
-        this.display_name = display_name;
+    public AppUser(String displayName, String email, String username, String password) {
+        this.displayName = displayName;
         this.email = email;
         this.username = username;
         this.password = password;

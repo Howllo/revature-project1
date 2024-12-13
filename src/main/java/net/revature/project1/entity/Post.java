@@ -39,7 +39,7 @@ public class Post {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<AppUser> likes = new HashSet<>();
+    private final Set<AppUser> likes = new HashSet<>();
 
     public Post(AppUser userId, String comment) {
         this.userId = userId;
