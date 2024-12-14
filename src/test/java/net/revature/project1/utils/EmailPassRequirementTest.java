@@ -1,4 +1,4 @@
-package net.revature.project1.controller.utils;
+package net.revature.project1.utils;
 
 import net.revature.project1.utils.EmailPassRequirementsUtils;
 import org.junit.jupiter.api.Assertions;

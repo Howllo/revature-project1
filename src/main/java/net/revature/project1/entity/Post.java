@@ -35,6 +35,9 @@ public class Post {
     @Column(name = "post_at", nullable = false)
     private Timestamp postAt;
 
+    @Column(name= "post_edit")
+    private boolean postEdited;
+
     @ManyToMany
     @JoinTable(
             name = "post_like",

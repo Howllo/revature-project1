@@ -1,8 +1,9 @@
 package net.revature.project1.service;
 
 import net.revature.project1.entity.AppUser;
-import net.revature.project1.enumerator.AuthResult;
+import net.revature.project1.enumerator.AuthEnum;
 import net.revature.project1.repository.AuthRepo;
+import net.revature.project1.result.AuthResult;
 import net.revature.project1.utils.EmailPassRequirementsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,12 +15,14 @@ import java.util.Optional;
 @Service
 public class AuthService {
     final private AuthRepo authRepo;
+    final private UserService userService;
     final private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthService(AuthRepo authRepo, PasswordEncoder passwordEncoder){
+    public AuthService(AuthRepo authRepo, PasswordEncoder passwordEncoder, UserService userService){
         this.authRepo = authRepo;
         this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     /**
@@ -31,25 +34,25 @@ public class AuthService {
     public AuthResult registration(AppUser user){
         if(!EmailPassRequirementsUtils.isValidEmail(user.getEmail()) ||
                 !EmailPassRequirementsUtils.isValidPassword(user.getPassword())){
-            return AuthResult.INVALID;
+            return new AuthResult(AuthEnum.INVALID, user);
         }
 
-        boolean isEmailAvailable = authRepo.existsByEmail(user.getEmail());
+        boolean isEmailAvailable = userService.existsByEmail(user.getEmail());
         if(isEmailAvailable){
-            return AuthResult.EMAIL_TAKEN;
+            return new AuthResult(AuthEnum.EMAIL_TAKEN, user);
         }
 
-        boolean isUserAvailable = authRepo.existsByUsername(user.getUsername());
+        boolean isUserAvailable = userService.existsByUsername(user.getUsername());
         if(isUserAvailable){
-            return AuthResult.USERNAME_TAKEN;
+            return new AuthResult(AuthEnum.USERNAME_TAKEN, user);
         }
 
         String hashPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassword);
 
-        authRepo.save(user);
+        AppUser returnUser = authRepo.save(user);
 
-        return AuthResult.CREATED;
+        return new AuthResult(AuthEnum.CREATED, returnUser);
     }
 
     /**
@@ -59,23 +62,24 @@ public class AuthService {
      */
     public AuthResult login(AppUser user){
         if(user.getEmail().isEmpty() || user.getPassword().isEmpty()){
-            return AuthResult.INVALID_CREDENTIALS;
+            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user);
         }
 
         if(!EmailPassRequirementsUtils.isValidEmail(user.getEmail())){
-            return AuthResult.INVALID_CREDENTIALS;
+            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user);
         }
 
-        Optional<AppUser> optionalAppUser = authRepo.findAppUserByEmail(user.getEmail());
+        Optional<AppUser> optionalAppUser = userService.findAppUserByEmail(user.getEmail());
         if(optionalAppUser.isEmpty()){
-            return AuthResult.INVALID_CREDENTIALS;
+            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user);
         }
 
         AppUser checkUser = optionalAppUser.get();
         if(!passwordEncoder.matches(user.getPassword(), checkUser.getPassword())){
-            return AuthResult.INVALID_CREDENTIALS;
+            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user);
         }
 
-        return AuthResult.SUCCESS;
+
+        return new AuthResult(AuthEnum.SUCCESS, checkUser);
     }
 }

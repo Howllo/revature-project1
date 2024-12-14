@@ -5,10 +5,11 @@ DROP TABLE IF EXISTS app_user;
 
 CREATE TABLE app_user (
     id INTEGER auto_increment PRIMARY KEY,
-    display_name VARCHAR(20) NOT NULL,
     email VARCHAR(50) NOT NULL,
-    username VARCHAR(20) NOT NULL,
     password VARCHAR(100) NOT NULL,
+    display_name VARCHAR(20) NOT NULL,
+    username VARCHAR(20) NOT NULL,
+    profile_pic VARCHAR(255) DEFAULT 'src/main/resources/static/image/Default_pfp.jpg',
     biography VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP NOT NULL
 );
@@ -20,6 +21,7 @@ CREATE TABLE post (
     comment VARCHAR(255),
     image_path VARCHAR(255),
     video_path VARCHAR(255),
+    post_edit BIT DEFAULT 0,
     post_at TIMESTAMP NOT NULL,
     FOREIGN KEY(parent_post) REFERENCES post(id),
     FOREIGN KEY(user_id) REFERENCES app_user(id)

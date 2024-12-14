@@ -10,6 +10,7 @@ import java.util.Set;
 
 @Entity
 @Getter
+@Setter
 @Table(name="app_user")
 public class AppUser {
     @Id
@@ -17,18 +18,20 @@ public class AppUser {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "display_name", nullable = false)
-    private String displayName;
-
     @Column(nullable = false)
     private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(name = "display_name", nullable = false)
+    private String displayName;
 
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
-    @Setter
-    private String password;
+    @Column(name = "profile_pic")
+    private String profilePic;
 
     private String biography;
 
@@ -51,8 +54,7 @@ public class AppUser {
 
     public AppUser() {}
 
-    public AppUser(String displayName, String email, String username, String password) {
-        this.displayName = displayName;
+    public AppUser(String email, String username, String password) {
         this.email = email;
         this.username = username;
         this.password = password;

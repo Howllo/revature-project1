@@ -1,6 +1,6 @@
 package net.revature.project1.enumerator;
 
-public enum AuthResult {
+public enum AuthEnum {
     CREATED,
     SUCCESS,
     EMAIL_TAKEN,
