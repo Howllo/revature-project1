@@ -1,6 +1,7 @@
 package net.revature.project1.service;
 
 import net.revature.project1.dto.UserDto;
+import net.revature.project1.dto.UserSearchDto;
 import net.revature.project1.entity.AppUser;
 import net.revature.project1.enumerator.UserEnum;
 import net.revature.project1.repository.UserRepo;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -45,6 +47,15 @@ public class UserService {
         );
 
         return new UserResult(UserEnum.SUCCESS, "Successfully got user profile!", userDto);
+    }
+
+    /**
+     * Returns limited amoutn of user based on username input
+     * @param username Take in a username that the user typed into the search.
+     * @return Return the list of user DTO that is close to what the user was looking for.
+     */
+    public List<UserSearchDto> getSearchUser(String username){
+        return userRepo.findTop7ByUsernameContaining(username);
     }
 
     /**

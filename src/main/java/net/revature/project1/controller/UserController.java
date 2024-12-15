@@ -1,6 +1,7 @@
 package net.revature.project1.controller;
 
 import jakarta.servlet.http.HttpSession;
+import net.revature.project1.dto.UserSearchDto;
 import net.revature.project1.entity.AppUser;
 import net.revature.project1.enumerator.UserEnum;
 import net.revature.project1.result.UserResult;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("api/v1/user")
@@ -30,6 +33,11 @@ public class UserController {
             case EMAIL_ALREADY_EXISTS, USER_ALREADY_FOLLOWING, UNAUTHORIZED, INVALID_EMAIL_FORMAT, UNKNOWN_USER,
                  UNKNOWN -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(userResult.getMessage());
         };
+    }
+
+    @GetMapping("/search/{username}")
+    public ResponseEntity<List<UserSearchDto>> searchForUser(@PathVariable String username){
+        return ResponseEntity.ok(userService.getSearchUser(username));
     }
 
     // This would be rate limited.
