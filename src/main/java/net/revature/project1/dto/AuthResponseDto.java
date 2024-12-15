@@ -6,10 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AuthResponseDto {
-    private String message;
-    private String username;
-    private String displayName;
-    private String profilePicture;
+    public String message;
+    public String username;
+    public String displayName;
+    public String profilePicture;
 
     public AuthResponseDto(String message, String username, String displayName, String profilePicture) {
         this.message = message;

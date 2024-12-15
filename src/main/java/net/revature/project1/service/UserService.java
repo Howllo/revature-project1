@@ -11,12 +11,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
+@Transactional
 public class UserService {
-    private UserRepo userRepo;
+    private final UserRepo userRepo;
 
     @Autowired
     public UserService(UserRepo userRepo){
@@ -149,11 +151,73 @@ public class UserService {
 
         return UserEnum.SUCCESS;
     }
-/*
-    public UserEnum followNewUser(){
 
+    /**
+     * Used to create a relationship between following and follower.
+     * @param followerId Take in a follower id. AKA who started the following.
+     * @param followingId Take in a following id. AKA who the person that is being followed.
+     * @return {@code UserEnum} is return depending on the status of the service.
+     */
+    public UserEnum followUser(Long followerId, Long followingId){
+        boolean checkAuth = checkAuthorization();
+        if(!checkAuth){
+            return UserEnum.UNAUTHORIZED;
+        }
+
+        Optional<AppUser> optionalFollower = userRepo.findById(followerId);
+        Optional<AppUser> optionalFollowing = userRepo.findById(followingId);
+        if(optionalFollower.isEmpty() || optionalFollowing.isEmpty()){
+            return UserEnum.UNKNOWN;
+        }
+
+        AppUser follower = optionalFollower.get();
+        AppUser following = optionalFollowing.get();
+        if(follower.getFollowing().contains(following)){
+            return UserEnum.USER_ALREADY_FOLLOWING;
+        }
+
+        follower.getFollowing().add(following);
+        following.getFollower().add(follower);
+
+        userRepo.save(follower);
+        userRepo.save(following);
+
+        return UserEnum.SUCCESS;
     }
-*/
+
+    /**
+     * Used to remove a relationship between following and follower.
+     * @param followerId Take in a follower id. AKA who started the unfollowing.
+     * @param followingId Take in a following id. AKA who the person that is being unfollowed.
+     * @return {@code UserEnum} is return depending on the status of the service.
+     */
+    public UserEnum unfollowUser(Long followerId, Long followingId){
+        boolean checkAuth = checkAuthorization();
+        if(!checkAuth){
+            return UserEnum.UNAUTHORIZED;
+        }
+
+        Optional<AppUser> optionalFollower = userRepo.findById(followerId);
+        Optional<AppUser> optionalFollowing = userRepo.findById(followingId);
+        if(optionalFollower.isEmpty() || optionalFollowing.isEmpty()){
+            return UserEnum.UNKNOWN;
+        }
+
+        AppUser follower = optionalFollower.get();
+        AppUser following = optionalFollowing.get();
+        if(!follower.getFollowing().contains(following) || !following.getFollower().contains(follower)){
+            return UserEnum.UNKNOWN;
+        }
+
+        follower.getFollowing().remove(following);
+        following.getFollower().remove(follower);
+
+        userRepo.save(follower);
+        userRepo.save(following);
+
+        return UserEnum.SUCCESS;
+    }
+
     /**
      * Used to check the authorization status if they can make the changes.
      *

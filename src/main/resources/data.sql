@@ -7,7 +7,7 @@ CREATE TABLE app_user (
     id INTEGER auto_increment PRIMARY KEY,
     email VARCHAR(50) NOT NULL,
     password VARCHAR(100) NOT NULL,
-    display_name VARCHAR(20) NOT NULL,
+    display_name VARCHAR(20) DEFAULT NULL,
     username VARCHAR(20) NOT NULL,
     profile_pic VARCHAR(255) DEFAULT 'src/main/resources/static/image/Default_pfp.jpg',
     biography VARCHAR(255) DEFAULT NULL,

@@ -24,7 +24,7 @@ public class AppUser {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "display_name", nullable = false)
+    @Column(name = "display_name")
     private String displayName;
 
     @Column(nullable = false, unique = true)
