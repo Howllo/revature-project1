@@ -33,6 +33,9 @@ public class AppUser {
     @Column(name = "profile_pic")
     private String profilePic;
 
+    @Column(name = "banner_pic")
+    private String bannerPic;
+
     private String biography;
 
     @Column(name = "created_at", nullable = false)

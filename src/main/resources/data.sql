@@ -10,6 +10,7 @@ CREATE TABLE app_user (
     display_name VARCHAR(20) DEFAULT NULL,
     username VARCHAR(20) NOT NULL,
     profile_pic VARCHAR(255) DEFAULT 'src/main/resources/static/image/Default_pfp.jpg',
+    banner_pic VARCHAR(255) DEFAULT NULL,
     biography VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP NOT NULL
 );

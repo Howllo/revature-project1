@@ -114,6 +114,11 @@ public class UserController {
         return ResponseEntity.ok("TODO: THIS IS A PLACEHOLDER.");
     }
 
+    //TODO: Implement the logic for file service and controller.
+    @PutMapping("/{id}/banner-pic")
+    public ResponseEntity<String> updateBannerPicture(@PathVariable Long id, HttpSession session){
+        return ResponseEntity.ok("TODO: THIS IS A PLACEHOLDER.");
+    }
     private ResponseEntity<String> resultResponse(UserEnum result, AppUser appUser, HttpSession session){
         return switch (result){
             case SUCCESS -> {

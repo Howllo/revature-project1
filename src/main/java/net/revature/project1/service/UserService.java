@@ -21,10 +21,12 @@ import java.util.Optional;
 @Transactional
 public class UserService {
     private final UserRepo userRepo;
+    private final FileService fileService;
 
     @Autowired
-    public UserService(UserRepo userRepo){
+    public UserService(UserRepo userRepo, FileService fileService){
         this.userRepo = userRepo;
+        this.fileService = fileService;
     }
 
     /**
@@ -41,9 +43,9 @@ public class UserService {
         AppUser user = optionalAppUser.get();
         UserDto userDto = new UserDto(
                 user.getUsername(), user.getDisplayName(),
-                user.getProfilePic(), user.getBiography(),
-                user.getFollower().size(), user.getFollowing().size(),
-                user.getCreatedAt()
+                user.getProfilePic(), user.getBannerPic(),
+                user.getBiography(), user.getFollower().size(),
+                user.getFollowing().size(), user.getCreatedAt()
         );
 
         return new UserResult(UserEnum.SUCCESS, "Successfully got user profile!", userDto);
