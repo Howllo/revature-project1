@@ -1,8 +1,10 @@
 package net.revature.project1.service;
 
 import net.revature.project1.dto.UserDto;
+import net.revature.project1.dto.UserRequestPicDto;
 import net.revature.project1.dto.UserSearchDto;
 import net.revature.project1.entity.AppUser;
+import net.revature.project1.enumerator.PicUploadType;
 import net.revature.project1.enumerator.UserEnum;
 import net.revature.project1.repository.UserRepo;
 import net.revature.project1.result.UserResult;
@@ -52,7 +54,7 @@ public class UserService {
     }
 
     /**
-     * Returns limited amoutn of user based on username input
+     * Returns limited amount of user based on username input
      * @param username Take in a username that the user typed into the search.
      * @return Return the list of user DTO that is close to what the user was looking for.
      */
@@ -228,6 +230,45 @@ public class UserService {
         userRepo.save(follower);
         userRepo.save(following);
 
+        return UserEnum.SUCCESS;
+    }
+
+    /**
+     * Used to update the profile picture of the user.
+     * @param id Take in the user id to find the user.
+     * @param responsePicDto Take in the response picture DTO to get the information to update the picture.
+     * @return {@code UserEnum} is return depending on the status of the service.
+     */
+    public UserEnum updateProfilePictures(Long id, UserRequestPicDto responsePicDto){
+        boolean checkAuth = checkAuthorization();
+        String imagePath = "";
+        if(!checkAuth){
+            return UserEnum.UNAUTHORIZED;
+        }
+
+        Optional<AppUser> userOptional = userRepo.findById(id);
+        if(userOptional.isEmpty()){
+            return UserEnum.UNKNOWN;
+        }
+
+        AppUser user = userOptional.get();
+        try {
+            imagePath = fileService.uploadFile (
+                    responsePicDto.fileType(),
+                    responsePicDto.picturePath(),
+                    responsePicDto.fileName()
+            );
+        } catch (Exception e){
+            return UserEnum.UNKNOWN;
+        }
+
+        if(responsePicDto.picUploadType() == PicUploadType.PROFILE_PIC){
+            user.setProfilePic(imagePath);
+        } else {
+            user.setBannerPic(imagePath);
+        }
+
+        userRepo.save(user);
         return UserEnum.SUCCESS;
     }
 

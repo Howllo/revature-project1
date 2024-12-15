@@ -1,7 +1,7 @@
 package net.revature.project1.controller;
 
 import jakarta.servlet.http.HttpSession;
-import net.revature.project1.dto.UserSearchDto;
+import net.revature.project1.dto.UserRequestPicDto;
 import net.revature.project1.entity.AppUser;
 import net.revature.project1.enumerator.UserEnum;
 import net.revature.project1.result.UserResult;
@@ -9,12 +9,10 @@ import net.revature.project1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("api/v1/user")
 public class UserController {
     private final UserService userService;
@@ -33,11 +31,6 @@ public class UserController {
             case EMAIL_ALREADY_EXISTS, USER_ALREADY_FOLLOWING, UNAUTHORIZED, INVALID_EMAIL_FORMAT, UNKNOWN_USER,
                  UNKNOWN -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(userResult.getMessage());
         };
-    }
-
-    @GetMapping("/search/{username}")
-    public ResponseEntity<List<UserSearchDto>> searchForUser(@PathVariable String username){
-        return ResponseEntity.ok(userService.getSearchUser(username));
     }
 
     // This would be rate limited.
@@ -94,31 +87,27 @@ public class UserController {
 
     @PostMapping("/{id}/follow/{user}")
     public ResponseEntity<String> followNewUser(@PathVariable("id") Long followerId,
-                                             @PathVariable("user") Long followingId,
-                                             HttpSession session) {
+                                                @PathVariable("user") Long followingId, HttpSession session) {
         UserEnum result = userService.followUser(followerId, followingId);
         return resultResponse(result, null, session);
     }
 
     @DeleteMapping("/{id}/follow/{user}")
     public ResponseEntity<String> unfollowUser(@PathVariable("id") Long followerId,
-                                             @PathVariable("user") Long followingId,
-                                             HttpSession session) {
+                                               @PathVariable("user") Long followingId,
+                                               HttpSession session) {
         UserEnum result = userService.unfollowUser(followerId, followingId);
         return resultResponse(result, null, session);
     }
 
-    //TODO: Implement the logic for file service and controller.
-    @PutMapping("/{id}/profile-pic/")
-    public ResponseEntity<String> updateProfilePicture(@PathVariable Long id, HttpSession session){
-        return ResponseEntity.ok("TODO: THIS IS A PLACEHOLDER.");
+    @PutMapping("/{id}/profile-pics/")
+    public ResponseEntity<String> updateProfilePictures(@PathVariable Long id,
+                                                        @RequestBody UserRequestPicDto responsePicDto,
+                                                        HttpSession session){
+        UserEnum result = userService.updateProfilePictures(id, responsePicDto);
+        return resultResponse(result, null, session);
     }
 
-    //TODO: Implement the logic for file service and controller.
-    @PutMapping("/{id}/banner-pic")
-    public ResponseEntity<String> updateBannerPicture(@PathVariable Long id, HttpSession session){
-        return ResponseEntity.ok("TODO: THIS IS A PLACEHOLDER.");
-    }
     private ResponseEntity<String> resultResponse(UserEnum result, AppUser appUser, HttpSession session){
         return switch (result){
             case SUCCESS -> {

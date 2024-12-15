@@ -40,7 +40,6 @@ public class AuthControllerIntegrationTest {
     private AuthRepo authRepo;
 
     private AppUser validUser;
-    private AppUser existingUser;
 
     @BeforeEach
     void setUp() {
@@ -56,7 +55,7 @@ public class AuthControllerIntegrationTest {
         );
 
         // Create and save an existing user
-        existingUser = new AppUser(
+        AppUser existingUser = new AppUser(
                 "existing@example.com",
                 "existinguser",
                 "Existing123!@#"
