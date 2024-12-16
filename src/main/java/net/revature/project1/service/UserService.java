@@ -292,6 +292,15 @@ public class UserService {
         return userDetails.getUsername().equals(oldEmail);
     }
 
+    /**
+     * Used to check the authorization status if they can make the changes.
+     *
+     * This would obviously have a better verification system in place to prevent anyone from just changing
+     * the important just because they certain information, but we don't have time to make sure verification
+     * code can be sent.
+     *
+     * @return Return {@code True} if the user can make changes, or {@code False} if they cannot make changes.
+     */
     public boolean checkAuthorization(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.isAuthenticated();
@@ -306,11 +315,30 @@ public class UserService {
         return userRepo.existsByEmail(email);
     }
 
+    /**
+     * Used to get check if a username already exist.
+     * @param username Take in a {@code String} with the username.
+     * @return A {@code boolean} of true that it exist, or false it doesn't.
+     */
     public boolean existsByUsername(String username){
         return userRepo.existsByUsername(username);
     }
 
+    /**
+     * Used to find a user by their email.
+     * @param email Take in the email of the user.
+     * @return Return an optional of the user.
+     */
     public Optional<AppUser> findAppUserByEmail(String email){
         return userRepo.findAppUserByEmail(email);
+    }
+
+    /**
+     * Used to find a user by their username.
+     * @param id Take in the id of the user.
+     * @return Return an optional of the user.
+     */
+    public Optional<AppUser> findUserById(Long id){
+        return userRepo.findById(id);
     }
 }
