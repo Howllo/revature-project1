@@ -1,5 +1,6 @@
 package net.revature.project1.controller;
 
+import net.revature.project1.dto.PostSmallResponseDto;
 import net.revature.project1.dto.UserSearchDto;
 import net.revature.project1.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,5 +25,10 @@ public class SearchController {
     @GetMapping("/user/{username}")
     public ResponseEntity<List<UserSearchDto>> searchForUser(@PathVariable String username){
         return ResponseEntity.ok(searchService.getSearchUser(username));
+    }
+
+    @GetMapping("/post/{content}")
+    public ResponseEntity<List<PostSmallResponseDto>> searchForPost(@PathVariable String content){
+        return ResponseEntity.ok(searchService.getSearchPost(content));
     }
 }

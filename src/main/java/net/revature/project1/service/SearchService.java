@@ -1,5 +1,6 @@
 package net.revature.project1.service;
 
+import net.revature.project1.dto.PostSmallResponseDto;
 import net.revature.project1.dto.UserSearchDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,5 +23,9 @@ public class SearchService {
      */
     public List<UserSearchDto> getSearchUser(String username){
         return userService.getSearchUser(username);
+    }
+
+    public List<PostSmallResponseDto> getSearchPost(String content){
+        return null;
     }
 }

@@ -59,7 +59,7 @@ public class UserControllerSearchIntegrationTest {
     @Test
     @WithMockUser(username = "john@example.com")
     void searchUsers_WithValidQuery_ShouldReturnMatchingUsers() throws Exception {
-        mockMvc.perform(get("/api/v1/user/search/john")
+        mockMvc.perform(get("/api/v1/search/user/john")
                         .session(session)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -72,7 +72,7 @@ public class UserControllerSearchIntegrationTest {
     @Test
     @WithMockUser(username = "john@example.com")
     void searchUsers_WithEmptyQuery_ShouldReturnEmptyList() throws Exception {
-        mockMvc.perform(get("/api/v1/user/search/")
+        mockMvc.perform(get("/api/v1/search/user/")
                         .session(session)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -81,7 +81,7 @@ public class UserControllerSearchIntegrationTest {
     @Test
     @WithMockUser(username = "john@example.com")
     void searchUsers_WithNonExistentUsername_ShouldReturnEmptyList() throws Exception {
-        mockMvc.perform(get("/api/v1/user/search/nonexistentuser")
+        mockMvc.perform(get("/api/v1/search/user/nonexistentuser")
                         .session(session)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -91,7 +91,7 @@ public class UserControllerSearchIntegrationTest {
     @Test
     @WithMockUser(username = "john@example.com")
     void searchUsers_WithPartialUsername_ShouldReturnMatchingUsers() throws Exception {
-        mockMvc.perform(get("/api/v1/user/search/doe")
+        mockMvc.perform(get("/api/v1/search/user/doe")
                         .session(session)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -101,7 +101,7 @@ public class UserControllerSearchIntegrationTest {
 
     @Test
     void searchUsers_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
-        mockMvc.perform(get("/api/v1/user/search/john")
+        mockMvc.perform(get("/api/v1/search/user/john")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
