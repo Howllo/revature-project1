@@ -8,9 +8,11 @@ import net.revature.project1.enumerator.AuthEnum;
 public class AuthResult {
     final private AuthEnum result;
     final private AppUser appUser;
+    final private String token;
 
-    public AuthResult(AuthEnum authEnum, AppUser appUser){
+    public AuthResult(AuthEnum authEnum, AppUser appUser, String token){
         this.result = authEnum;
         this.appUser = appUser;
+        this.token = token;
     }
 }

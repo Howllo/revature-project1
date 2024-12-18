@@ -10,11 +10,13 @@ public class AuthResponseDto {
     public String username;
     public String displayName;
     public String profilePicture;
+    public String token;
 
-    public AuthResponseDto(String message, String username, String displayName, String profilePicture) {
+    public AuthResponseDto(String message, String username, String displayName, String profilePicture, String token) {
         this.message = message;
         this.username = username;
         this.displayName = displayName;
         this.profilePicture = profilePicture;
+        this.token = token;
     }
 }

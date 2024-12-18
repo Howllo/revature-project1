@@ -3,9 +3,14 @@ package net.revature.project1.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -43,7 +48,7 @@ public class AppUser {
 
     @ManyToMany
     @JoinTable(
-            name = "follow",
+            name = "follower_following",
             joinColumns = @JoinColumn(name = "follower_id"),
             inverseJoinColumns = @JoinColumn(name ="following_id")
     )
@@ -51,6 +56,17 @@ public class AppUser {
 
     @ManyToMany(mappedBy = "follower")
     private final Set<AppUser> following = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "user_friend",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name ="friend_id", referencedColumnName = "id")
+    )
+    private final Set<AppUser> initiatedFriendships  = new HashSet<>();
+
+    @ManyToMany(mappedBy = "friends")
+    private final Set<AppUser> receivedFriendships  = new HashSet<>();
 
     @ManyToMany(mappedBy = "likes")
     private final Set<Post> likedPosts = new HashSet<>();

@@ -23,22 +23,18 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AppUser user, HttpSession session){
+    public ResponseEntity<?> register(@RequestBody AppUser user){
         AuthResult result = authService.registration(user);
         AppUser returnedUser = result.getAppUser();
 
         return switch (result.getResult()) {
-            case CREATED, SUCCESS -> {
-                session.setAttribute("email", user.getEmail());
-                session.setAttribute("user", user.getUsername());
-
-                yield ResponseEntity.status(HttpStatus.CREATED)
+            case CREATED, SUCCESS -> ResponseEntity.status(HttpStatus.CREATED)
                     .body(new AuthResponseDto("Successfully created a account.",
                             returnedUser.getUsername(),
                             null,
-                            returnedUser.getProfilePic()
+                            returnedUser.getProfilePic(),
+                            result.getToken()
                     ));
-            }
             case EMAIL_TAKEN -> ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("Email already registered");
             case USERNAME_TAKEN -> ResponseEntity.status(HttpStatus.CONFLICT)
@@ -52,22 +48,19 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AppUser user, HttpSession session){
+    public ResponseEntity<?> login(@RequestBody AppUser user){
         AuthResult authResult = authService.login(user);
         AuthEnum result = authResult.getResult();
         AppUser returnUser = authResult.getAppUser();
 
         return switch(result) {
-            case CREATED, SUCCESS -> {
-                session.setAttribute("email", user.getEmail());
-                session.setAttribute("user", authResult.getAppUser().getUsername());
-                yield ResponseEntity.status(HttpStatus.OK)
+            case CREATED, SUCCESS -> ResponseEntity.status(HttpStatus.OK)
                         .body(new AuthResponseDto("Login successful!",
                                 returnUser.getUsername(),
                                 returnUser.getDisplayName(),
-                                returnUser.getProfilePic()
+                                returnUser.getProfilePic(),
+                                authResult.getToken()
                         ));
-                }
                 case INVALID, INVALID_CREDENTIALS -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Invalid email or password. Please try again.");
                 case UNKNOWN, USERNAME_TAKEN, EMAIL_TAKEN -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

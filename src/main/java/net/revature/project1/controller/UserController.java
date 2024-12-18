@@ -108,6 +108,13 @@ public class UserController {
         return resultResponse(result, null, session);
     }
 
+    @PostMapping("/{id}/friend-request/{user}")
+    public ResponseEntity<String> sendFriendRequest(@PathVariable("id") Long senderId,
+                                                    @PathVariable("user") Long receiverId, HttpSession session) {
+        UserEnum result = userService.sendFriendRequest(senderId, receiverId);
+        return resultResponse(result, null, session);
+    }
+
     private ResponseEntity<String> resultResponse(UserEnum result, AppUser appUser, HttpSession session){
         return switch (result){
             case SUCCESS -> {

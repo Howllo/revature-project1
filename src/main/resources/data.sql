@@ -28,7 +28,7 @@ CREATE TABLE post (
     FOREIGN KEY(user_id) REFERENCES app_user(id)
 );
 
-CREATE TABLE follow (
+CREATE TABLE follower_following (
     follower_id INTEGER NOT NULL,
     following_id INTEGER NOT NULL,
     FOREIGN KEY (follower_id) REFERENCES app_user(id),
@@ -43,3 +43,11 @@ CREATE TABLE post_like (
     FOREIGN KEY (user_id) REFERENCES app_user(id),
     PRIMARY KEY (post_id, user_id)
 );
+
+CREATE TABLE user_friend (
+    user_id INTEGER NOT NULL,
+    friend_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES app_user(id),
+    FOREIGN KEY (friend_id) REFERENCES app_user(id),
+    PRIMARY KEY (user_id, friend_id)
+)

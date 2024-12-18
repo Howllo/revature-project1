@@ -70,11 +70,6 @@ public class UserService {
      * @return Returns an enum whether it was successful or not.
      */
     public UserEnum updateEmail(Long id, AppUser user, String oldEmail){
-        boolean checkAuth = checkAuthorization(oldEmail);
-        if(!checkAuth){
-            return UserEnum.UNAUTHORIZED;
-        }
-
         if(!EmailPassRequirementsUtils.isValidEmail(user.getEmail())){
             return UserEnum.INVALID_EMAIL_FORMAT;
         }
@@ -102,11 +97,6 @@ public class UserService {
      * @return UserEnum based on the status of the service.
      */
     public UserEnum updateUsername(Long id, AppUser user){
-        boolean checkAuth = checkAuthorization();
-        if(!checkAuth){
-            return UserEnum.UNAUTHORIZED;
-        }
-
         Optional<AppUser> userOptional = userRepo.findById(id);
         if(userOptional.isEmpty()){
             return UserEnum.UNKNOWN;
@@ -126,11 +116,6 @@ public class UserService {
      * @return UserEnum based on the status of the service.
      */
     public UserEnum updateDisplayName(Long id, AppUser appUser){
-        boolean checkAuth = checkAuthorization();
-        if(!checkAuth){
-            return UserEnum.UNAUTHORIZED;
-        }
-
         Optional<AppUser> userOptional = userRepo.findById(id);
         if(userOptional.isEmpty()){
             return UserEnum.UNKNOWN;
@@ -150,11 +135,6 @@ public class UserService {
      * @return UserEnum based on the status of the service.
      */
     public UserEnum updateBiography(Long id, AppUser appUser){
-        boolean checkAuth = checkAuthorization();
-        if(!checkAuth){
-            return UserEnum.UNAUTHORIZED;
-        }
-
         Optional<AppUser> userOptional = userRepo.findById(id);
         if(userOptional.isEmpty()){
             return UserEnum.UNKNOWN;
@@ -174,11 +154,6 @@ public class UserService {
      * @return {@code UserEnum} is return depending on the status of the service.
      */
     public UserEnum followUser(Long followerId, Long followingId){
-        boolean checkAuth = checkAuthorization();
-        if(!checkAuth){
-            return UserEnum.UNAUTHORIZED;
-        }
-
         Optional<AppUser> optionalFollower = userRepo.findById(followerId);
         Optional<AppUser> optionalFollowing = userRepo.findById(followingId);
         if(optionalFollower.isEmpty() || optionalFollowing.isEmpty()){
@@ -207,11 +182,6 @@ public class UserService {
      * @return {@code UserEnum} is return depending on the status of the service.
      */
     public UserEnum unfollowUser(Long followerId, Long followingId){
-        boolean checkAuth = checkAuthorization();
-        if(!checkAuth){
-            return UserEnum.UNAUTHORIZED;
-        }
-
         Optional<AppUser> optionalFollower = userRepo.findById(followerId);
         Optional<AppUser> optionalFollowing = userRepo.findById(followingId);
         if(optionalFollower.isEmpty() || optionalFollowing.isEmpty()){
@@ -240,11 +210,7 @@ public class UserService {
      * @return {@code UserEnum} is return depending on the status of the service.
      */
     public UserEnum updateProfilePictures(Long id, UserRequestPicDto responsePicDto){
-        boolean checkAuth = checkAuthorization();
         String imagePath = "";
-        if(!checkAuth){
-            return UserEnum.UNAUTHORIZED;
-        }
 
         Optional<AppUser> userOptional = userRepo.findById(id);
         if(userOptional.isEmpty()){
@@ -273,37 +239,28 @@ public class UserService {
     }
 
     /**
-     * Used to check the authorization status if they can make the changes.
-     *
-     * This would obviously have a better verification system in place to prevent anyone from just changing
-     * the important just because they certain information, but we don't have time to make sure verification
-     * code can be sent.
-     *
-     * @param oldEmail Take in old email to compared from user details.
-     * @return Return {@code True} if the user can make changes, or {@code False} if they cannot make changes.
+     * Used to send a friend request to another user.
+     * @param senderId Take in the id of the user that is sending the request.
+     * @param receiverId Take in the id of the user that is receiving the request.
+     * @return {@code UserEnum} is return depending on the status of the service.
      */
-    public boolean checkAuthorization(String oldEmail){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication == null || !authentication.isAuthenticated()){
-            return false;
+    public UserEnum sendFriendRequest(Long senderId, Long receiverId) {
+        Optional<AppUser> optionalSender = userRepo.findById(senderId);
+        Optional<AppUser> optionalReceiver = userRepo.findById(receiverId);
+        if (optionalSender.isEmpty() || optionalReceiver.isEmpty()) {
+            return UserEnum.UNKNOWN;
         }
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userDetails.getUsername().equals(oldEmail);
-    }
+        AppUser sender = optionalSender.get();
+        AppUser receiver = optionalReceiver.get();
+        if (sender.getReceivedFriendships().contains(receiver)) {
+            return UserEnum.USER_ALREADY_FRIENDS;
+        }
 
-    /**
-     * Used to check the authorization status if they can make the changes.
-     *
-     * This would obviously have a better verification system in place to prevent anyone from just changing
-     * the important just because they certain information, but we don't have time to make sure verification
-     * code can be sent.
-     *
-     * @return Return {@code True} if the user can make changes, or {@code False} if they cannot make changes.
-     */
-    public boolean checkAuthorization(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.isAuthenticated();
+        sender.getInitiatedFriendships().add(receiver);
+        userRepo.save(sender);
+
+        return UserEnum.SUCCESS;
     }
 
     /**
@@ -340,5 +297,9 @@ public class UserService {
      */
     public Optional<AppUser> findUserById(Long id){
         return userRepo.findById(id);
+    }
+
+    public AppUser findByUsername(String username) {
+        return userRepo.findAppUserByUsername(username);
     }
 }
