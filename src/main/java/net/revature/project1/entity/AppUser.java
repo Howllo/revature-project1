@@ -42,6 +42,7 @@ public class AppUser {
     private String bannerPic;
 
     private String biography;
+    private String role = "user";
 
     @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
