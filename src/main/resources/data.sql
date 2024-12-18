@@ -15,6 +15,15 @@ CREATE TABLE app_user (
     created_at TIMESTAMP NOT NULL
 );
 
+CREATE TABLE friend_request(
+    id INTEGER auto_increment PRIMARY KEY,
+    sender INTEGER NOT NULL,
+    receiver INTEGER NOT NULL,
+    expires TIMESTAMP NOT NULL,
+    FOREIGN KEY (sender) REFERENCES app_user(id),
+    FOREIGN KEY (receiver) REFERENCES app_user(id),
+);
+
 CREATE TABLE post (
     id INTEGER auto_increment PRIMARY KEY,
     parent_post INTEGER DEFAULT NULL,

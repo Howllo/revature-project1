@@ -69,10 +69,6 @@ public class PostService {
     * @return The created post.
     */
     public PostResult createPost(Post post) {
-        boolean isAuth = userService.checkAuthorization();
-        if(!isAuth) {
-            return new PostResult(PostEnum.UNAUTHORIZED, null, null);
-        }
 
         if(post.getComment() == null && post.getImagePath() == null && post.getVideoPath() == null) {
             return new PostResult(PostEnum.INVALID_POST, "Post must have a comment, " +
@@ -95,10 +91,6 @@ public class PostService {
      * @return The updated version of the post.
      */
     public PostResult updatePost(Long id, Post post) {
-        boolean isAuth = userService.checkAuthorization();
-        if(!isAuth) {
-            return new PostResult(PostEnum.UNAUTHORIZED, null, null);
-        }
 
         Optional<Post> postOptional = postRepo.findById(id);
         if(postOptional.isEmpty()) {
@@ -130,10 +122,6 @@ public class PostService {
     * @return The deleted post.
     */
     public PostEnum deletePost(Long id) {
-        boolean isAuth = userService.checkAuthorization();
-        if(!isAuth) {
-            return PostEnum.UNAUTHORIZED;
-        }
 
         Optional<Post> post = postRepo.findById(id);
         if(post.isEmpty()) {
@@ -151,10 +139,6 @@ public class PostService {
      * @return The status of the like.
      */
     public PostEnum likePost(Long id, Long userId) {
-        boolean isAuth = userService.checkAuthorization();
-        if(!isAuth) {
-            return PostEnum.UNAUTHORIZED;
-        }
 
         Optional<Post> post = postRepo.findById(id);
         if(post.isEmpty()) {

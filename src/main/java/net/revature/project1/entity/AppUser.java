@@ -65,7 +65,7 @@ public class AppUser {
     )
     private final Set<AppUser> initiatedFriendships  = new HashSet<>();
 
-    @ManyToMany(mappedBy = "friends")
+    @ManyToMany(mappedBy = "initiatedFriendships")
     private final Set<AppUser> receivedFriendships  = new HashSet<>();
 
     @ManyToMany(mappedBy = "likes")

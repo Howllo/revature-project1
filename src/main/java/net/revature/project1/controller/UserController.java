@@ -28,8 +28,9 @@ public class UserController {
         UserResult userResult = userService.getUser(id);
         return switch (userResult.getResult()){
             case SUCCESS -> ResponseEntity.ok(userResult.getUserDto());
-            case EMAIL_ALREADY_EXISTS, USER_ALREADY_FOLLOWING, UNAUTHORIZED, INVALID_EMAIL_FORMAT, UNKNOWN_USER,
-                 UNKNOWN -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(userResult.getMessage());
+            case EMAIL_ALREADY_EXISTS, USER_ALREADY_FRIENDS, USER_ALREADY_FOLLOWING, UNAUTHORIZED, INVALID_EMAIL_FORMAT,
+                 UNKNOWN_USER, UNKNOWN -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(userResult.getMessage());
         };
     }
 
@@ -58,7 +59,7 @@ public class UserController {
                     "use.");
             case INVALID_EMAIL_FORMAT -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The email in which was" +
                     "provided does not meet the requirements.");
-            case USER_ALREADY_FOLLOWING, UNKNOWN, UNKNOWN_USER -> ResponseEntity.status(
+            case USER_ALREADY_FOLLOWING, USER_ALREADY_FRIENDS, UNKNOWN, UNKNOWN_USER -> ResponseEntity.status(
                     HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error - An unexpected error occurred on the" +
                     " server. Please try again later");
         };
@@ -117,18 +118,15 @@ public class UserController {
 
     private ResponseEntity<String> resultResponse(UserEnum result, AppUser appUser, HttpSession session){
         return switch (result){
-            case SUCCESS -> {
-                if(appUser != null && appUser.getUsername() != null && !appUser.getUsername().isEmpty()){
-                    session.setAttribute("user", appUser.getUsername());
-                }
-                yield ResponseEntity.ok("Successfully updated information.");
-            }
+            case SUCCESS -> ResponseEntity.ok("Successfully updated information.");
             case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized to do this.");
             case EMAIL_ALREADY_EXISTS -> ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already in use.");
             case INVALID_EMAIL_FORMAT -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This email fails to follow" +
                     "the email standard.");
             case USER_ALREADY_FOLLOWING -> ResponseEntity.status(HttpStatus.CONFLICT).body("You are already following" +
-                    "this user.");
+                    "this person.");
+            case USER_ALREADY_FRIENDS -> ResponseEntity.status(HttpStatus.CONFLICT).body("You are already friends with " +
+                    "this person.");
             case UNKNOWN, UNKNOWN_USER -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server" +
                     " Error - An unexpected error occurred on the server. Please try again later");
         };
