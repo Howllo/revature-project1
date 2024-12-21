@@ -15,6 +15,8 @@ import java.util.Objects;
 
 @Service
 public class CaptchaService {
+    boolean debug = false;
+
     @Value("${hcaptcha.secret}")
     private String secret;
 
@@ -35,6 +37,12 @@ public class CaptchaService {
         map.add("secret", secret);
         map.add("sitekey", "d80e5192-471a-4678-b5be-8a22b3445e42");
 
+        if(debug){
+            System.out.println("The token is: " + token);
+            System.out.println("The secret is: " + secret);
+            System.out.println("The sitekey is: " + "d80e5192-471a-4678-b5be-8a22b3445e42");
+        }
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
         try {
@@ -43,6 +51,10 @@ public class CaptchaService {
                     request,
                     Map.class
             );
+
+            if(debug){
+                System.out.println(response.getBody());
+            }
 
             return response.getStatusCode() == HttpStatus.OK &&
                     Boolean.TRUE.equals(Objects.requireNonNull(response.getBody()).get("success"));

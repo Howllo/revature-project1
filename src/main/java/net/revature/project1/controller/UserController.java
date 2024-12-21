@@ -1,5 +1,6 @@
 package net.revature.project1.controller;
 
+import net.revature.project1.dto.EmailData;
 import net.revature.project1.dto.UserRequestPicDto;
 import net.revature.project1.entity.AppUser;
 import net.revature.project1.enumerator.UserEnum;
@@ -52,9 +53,9 @@ public class UserController {
         return resultResponse(result);
     }
 
-    @GetMapping("/check/email/{email}")
-    public ResponseEntity<String> checkEmail(@PathVariable String email) {
-        boolean isNotAvailable = userService.existsByEmail(email);
+    @PostMapping("/check/email")
+    public ResponseEntity<String> checkEmail(@RequestBody EmailData emailData) {
+        boolean isNotAvailable = userService.existsByEmail(emailData.email());
         if(isNotAvailable){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("This email is already taken.");
         }
