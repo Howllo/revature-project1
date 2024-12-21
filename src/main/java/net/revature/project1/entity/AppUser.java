@@ -1,21 +1,11 @@
 package net.revature.project1.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
 @Table(name="app_user")
 public class AppUser {
     @Id
@@ -79,5 +69,93 @@ public class AppUser {
         this.username = username;
         this.password = password;
         this.createdAt = new Timestamp(System.currentTimeMillis());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getProfilePic() {
+        return profilePic;
+    }
+
+    public String getBannerPic() {
+        return bannerPic;
+    }
+
+    public String getBiography() {
+        return biography;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public Set<AppUser> getFollower() {
+        return follower;
+    }
+
+    public Set<AppUser> getFollowing() {
+        return following;
+    }
+
+    public Set<AppUser> getInitiatedFriendships() {
+        return initiatedFriendships;
+    }
+
+    public Set<AppUser> getReceivedFriendships() {
+        return receivedFriendships;
+    }
+
+    public Set<Post> getLikedPosts() {
+        return likedPosts;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
+    }
+
+    public void setBannerPic(String bannerPic) {
+        this.bannerPic = bannerPic;
+    }
+
+    public void setBiography(String biography) {
+        this.biography = biography;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

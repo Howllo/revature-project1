@@ -8,11 +8,8 @@ import net.revature.project1.enumerator.PicUploadType;
 import net.revature.project1.enumerator.UserEnum;
 import net.revature.project1.repository.UserRepo;
 import net.revature.project1.result.UserResult;
-import net.revature.project1.utils.EmailPassRequirementsUtils;
+import net.revature.project1.utils.RegisterRequirementsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,8 +66,8 @@ public class UserService {
      * @param user Take in user object with the new email.
      * @return Returns an enum whether it was successful or not.
      */
-    public UserEnum updateEmail(Long id, AppUser user, String oldEmail){
-        if(!EmailPassRequirementsUtils.isValidEmail(user.getEmail())){
+    public UserEnum updateEmail(Long id, AppUser user){
+        if(!RegisterRequirementsUtils.isValidEmail(user.getEmail())){
             return UserEnum.INVALID_EMAIL_FORMAT;
         }
 
@@ -97,6 +94,14 @@ public class UserService {
      * @return UserEnum based on the status of the service.
      */
     public UserEnum updateUsername(Long id, AppUser user){
+        if(user.getUsername().isEmpty()
+                || RegisterRequirementsUtils.isValidUsername(user.getUsername())
+                || user.getUsername().length() < 3
+                || user.getUsername().length() > 20
+        ){
+            return UserEnum.BAD_USERNAME;
+        }
+
         Optional<AppUser> userOptional = userRepo.findById(id);
         if(userOptional.isEmpty()){
             return UserEnum.UNKNOWN;

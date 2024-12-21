@@ -1,10 +1,5 @@
 package net.revature.project1.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class AuthResponseDto {
     public String message;
     public String username;
@@ -17,6 +12,46 @@ public class AuthResponseDto {
         this.username = username;
         this.displayName = displayName;
         this.profilePicture = profilePicture;
+        this.token = token;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
         this.token = token;
     }
 }

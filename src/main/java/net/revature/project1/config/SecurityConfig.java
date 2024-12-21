@@ -41,11 +41,9 @@ public class SecurityConfig {
     private int iterations;
 
     private final UserService userService;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(UserService userService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(UserService userService) {
         this.userService = userService;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @PostConstruct
@@ -66,17 +64,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/image/**", "/files/**", "/video/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/api/v1/auth/verify-captcha").permitAll()
+                        .requestMatchers("/api/v1/users/**").hasRole("USER")
+                        .requestMatchers("/api/v1/user/check/username/{username}").permitAll()
+                        .requestMatchers("/api/v1/user/check/email/{email}").permitAll()
+                        .requestMatchers("/api/v1/search/**").permitAll()
+                        .requestMatchers("/image/**","/files/**", "/video/**","/css/**", "/js/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
@@ -93,10 +94,5 @@ public class SecurityConfig {
                     .roles("USER")
                     .build();
         };
-    }
-
-    @Bean
-    public SecretKey secretKey() {
-        return Jwts.SIG.HS256.key().build();
     }
 }

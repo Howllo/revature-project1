@@ -1,13 +1,13 @@
 package net.revature.project1.service;
 
+import net.revature.project1.dto.AuthRequestDto;
 import net.revature.project1.entity.AppUser;
 import net.revature.project1.enumerator.AuthEnum;
 import net.revature.project1.repository.AuthRepo;
 import net.revature.project1.result.AuthResult;
 import net.revature.project1.security.JwtTokenUtil;
-import net.revature.project1.utils.EmailPassRequirementsUtils;
+import net.revature.project1.utils.RegisterRequirementsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,32 +44,34 @@ public class AuthService {
      * @return {@code AuthResult} with the status of the interaction.
      */
     @Transactional
-    public AuthResult registration(AppUser user){
-        if(!EmailPassRequirementsUtils.isValidEmail(user.getEmail()) ||
-                !EmailPassRequirementsUtils.isValidPassword(user.getPassword())){
-            return new AuthResult(AuthEnum.INVALID, user, null);
+    public AuthResult registration(AuthRequestDto user){
+        if(!RegisterRequirementsUtils.isValidEmail(user.email()) ||
+                !RegisterRequirementsUtils.isValidPassword(user.password()) ||
+                !RegisterRequirementsUtils.isValidUsername(user.username())){
+            return new AuthResult(AuthEnum.INVALID, null, null, null);
         }
 
-        boolean isEmailAvailable = userService.existsByEmail(user.getEmail());
+        boolean isEmailAvailable = userService.existsByEmail(user.email());
         if(isEmailAvailable){
-            return new AuthResult(AuthEnum.EMAIL_TAKEN, user, null);
+            return new AuthResult(AuthEnum.EMAIL_TAKEN, null, null, null);
         }
 
-        boolean isUserAvailable = userService.existsByUsername(user.getUsername());
+        boolean isUserAvailable = userService.existsByUsername(user.username());
         if(isUserAvailable){
-            return new AuthResult(AuthEnum.USERNAME_TAKEN, user, null);
+            return new AuthResult(AuthEnum.USERNAME_TAKEN, null, null, null);
         }
 
-        String hashPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashPassword);
+        String hashPassword = passwordEncoder.encode(user.password());
+        AppUser newUser = new AppUser(user.username(), user.email(), hashPassword);
+        newUser.setPassword(hashPassword);
 
-        AppUser returnUser = authRepo.save(user);
+        AppUser returnUser = authRepo.save(newUser);
 
         Map<String, Object> claims = Map.of("userId", returnUser.getId());
         claims.put("username", returnUser.getUsername());
         var token = jwtTokenUtil.generateToken(returnUser.getEmail(), claims);
 
-        return new AuthResult(AuthEnum.CREATED, returnUser, token);
+        return new AuthResult(AuthEnum.CREATED, user, token, returnUser);
     }
 
     /**
@@ -77,29 +79,29 @@ public class AuthService {
      * @param user Take in a data to be processed.
      * @return {@code AuthResult} of status of the auth service layer.
      */
-    public AuthResult login(AppUser user){
-        if(user.getEmail().isEmpty() || user.getPassword().isEmpty()){
-            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null);
+    public AuthResult login(AuthRequestDto user){
+        if(user.email().isEmpty() || user.password().isEmpty()){
+            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null, null);
         }
 
-        if(!EmailPassRequirementsUtils.isValidEmail(user.getEmail())){
-            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null);
+        if(!RegisterRequirementsUtils.isValidEmail(user.email())){
+            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null, null);
         }
 
-        Optional<AppUser> optionalAppUser = userService.findAppUserByEmail(user.getEmail());
+        Optional<AppUser> optionalAppUser = userService.findAppUserByEmail(user.email());
         if(optionalAppUser.isEmpty()){
-            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null);
+            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null, null);
         }
 
         AppUser checkUser = optionalAppUser.get();
-        if(!passwordEncoder.matches(user.getPassword(), checkUser.getPassword())){
-            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null);
+        if(!passwordEncoder.matches(user.email(), checkUser.getPassword())){
+            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null, null);
         }
 
         Map<String, Object> claims = Map.of("userId", checkUser.getId());
         claims.put("username", checkUser.getUsername());
         var token = jwtTokenUtil.generateToken(checkUser.getEmail(), claims);
 
-        return new AuthResult(AuthEnum.SUCCESS, checkUser, token);
+        return new AuthResult(AuthEnum.SUCCESS, user, token, checkUser);
     }
 }
