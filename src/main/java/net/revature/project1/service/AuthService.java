@@ -45,11 +45,6 @@ public class AuthService {
      */
     @Transactional
     public AuthResult registration(AuthRequestDto user){
-        System.out.println("Registration Service");
-        System.out.println(user.email());
-        System.out.println(user.password());
-        System.out.println(user.username());
-
         if(user.email() == null|| user.password() == null || user.username() == null){
             return new AuthResult(AuthEnum.INVALID, null, null, null);
         }
