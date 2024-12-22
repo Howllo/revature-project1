@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "ambitious-flower-087fe871e.4.azurestaticapps.net")
+@CrossOrigin(origins = "http://localhost:5173/")
 @RestController
 @RequestMapping("api/v1/search")
 public class SearchController {

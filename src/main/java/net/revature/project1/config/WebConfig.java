@@ -22,9 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/v1/**")
                 .allowedOrigins(
-                        "http://localhost:5173",
-                        "https://www.devature.dev",
-                        "https://ambitious-flower-087fe871e.4.azurestaticapps.net"
+                        "http://localhost:5173"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
