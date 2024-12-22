@@ -20,10 +20,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
+        registry.addMapping("/api/v1/**")
                 .allowedOrigins(
                         "http://localhost:5173",
-                        "ambitious-flower-087fe871e.4.azurestaticapps.net"
+                        "https://www.devature.dev",
+                        "https://ambitious-flower-087fe871e.4.azurestaticapps.net"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
