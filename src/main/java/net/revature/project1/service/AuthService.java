@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -67,11 +68,11 @@ public class AuthService {
 
         String hashPassword = passwordEncoder.encode(user.password());
         AppUser newUser = new AppUser(user.username(), user.email(), hashPassword);
-        newUser.setPassword(hashPassword);
 
         AppUser returnUser = authRepo.save(newUser);
 
-        Map<String, Object> claims = Map.of("userId", returnUser.getId());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", returnUser.getId());
         claims.put("username", returnUser.getUsername());
         var token = jwtTokenUtil.generateToken(returnUser.getEmail(), claims);
 
