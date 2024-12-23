@@ -3,9 +3,11 @@ package net.revature.project1.controller;
 import jakarta.servlet.http.HttpSession;
 import net.revature.project1.dto.AuthRequestDto;
 import net.revature.project1.dto.AuthResponseDto;
+import net.revature.project1.dto.TokenVerify;
 import net.revature.project1.entity.AppUser;
 import net.revature.project1.enumerator.AuthEnum;
 import net.revature.project1.result.AuthResult;
+import net.revature.project1.security.JwtTokenUtil;
 import net.revature.project1.service.AuthService;
 import net.revature.project1.service.CaptchaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,17 +15,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.SignatureException;
+
 @CrossOrigin(origins = "http://localhost:5173/")
 @RestController
 @RequestMapping("api/v1/auth")
 public class AuthController {
     final private AuthService authService;
     final private CaptchaService captchaService;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public AuthController(AuthService authService, CaptchaService captchaService){
+    public AuthController(AuthService authService, CaptchaService captchaService, JwtTokenUtil jwtTokenUtil){
         this.authService = authService;
         this.captchaService = captchaService;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @PostMapping("/register")
@@ -51,7 +57,7 @@ public class AuthController {
         };
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDto user){
         AuthResult authResult = authService.login(user);
         AuthEnum result = authResult.getResult();
@@ -65,7 +71,7 @@ public class AuthController {
                                 returnUser.getProfilePic(),
                                 authResult.getToken()
                         ));
-                case INVALID, INVALID_CREDENTIALS -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                case INVALID, INVALID_CREDENTIALS -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Invalid email or password. Please try again.");
                 case UNKNOWN, USERNAME_TAKEN, EMAIL_TAKEN -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Internal Server Error - An unexpected error occurred on the server. " +
@@ -95,5 +101,23 @@ public class AuthController {
         }
         return ResponseEntity.ok("Success: Captcha verified.");
     }
-}
 
+    @PostMapping("/verify-token")
+    public ResponseEntity<String> tokenVerify(@RequestBody TokenVerify tokenVerify) {
+        try {
+            if (tokenVerify == null || tokenVerify.token() == null || tokenVerify.username() == null) {
+                return ResponseEntity.badRequest().body("Bad Request: Token is null.");
+            }
+
+            boolean isValidToken = jwtTokenUtil.validateToken(tokenVerify.token(), tokenVerify.username());
+
+            if (!isValidToken) {
+                return ResponseEntity.badRequest().body("Bad Request: Token is invalid.");
+            }
+            return ResponseEntity.ok("Success: Token verified.");
+        } catch (SignatureException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error -" +
+                    " An unexpected error occurred on the server. Please try again later");
+        }
+    }
+}

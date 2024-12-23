@@ -304,7 +304,12 @@ public class UserService {
         return userRepo.findById(id);
     }
 
-    public AppUser findByUsername(String username) {
+    /**
+     * Find the user by their username instead of email.
+     * @param username Takes in the username to be used for processing.
+     * @return {@code Optional} app user from the result of searching database.
+     */
+    public Optional<AppUser> findByUsername(String username) {
         return userRepo.findAppUserByUsername(username);
     }
 }

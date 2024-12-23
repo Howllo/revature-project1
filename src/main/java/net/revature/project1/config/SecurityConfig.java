@@ -1,6 +1,5 @@
 package net.revature.project1.config;
 
-import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import net.revature.project1.security.JwtAuthenticationFilter;
 import net.revature.project1.service.UserService;
@@ -12,7 +11,9 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -21,6 +22,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.crypto.SecretKey;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -70,6 +73,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/auth/verify-captcha").permitAll()
+                        .requestMatchers("/api/v1/auth/verify-token").permitAll()
                         .requestMatchers("/api/v1/users/**").hasRole("USER")
                         .requestMatchers("/api/v1/user/check/username/{username}").permitAll()
                         .requestMatchers("/api/v1/user/check/email").permitAll()
@@ -84,15 +88,20 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            var user = userService.findByUsername(username);
-            if (user == null) {
+            var optionalUser = userService.findByUsername(username);
+            if (optionalUser.isEmpty()) {
                 throw new UsernameNotFoundException("User not found");
             }
-            return org.springframework.security.core.userdetails.User
-                    .withUsername(user.getUsername())
-                    .password(user.getPassword())
-                    .roles("USER")
-                    .build();
+            var user = optionalUser.get();
+
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            String roleWithPrefix = user.getRole().startsWith("ROLE_") ?
+                    user.getRole() : "ROLE_" + user.getRole().toUpperCase();
+            authorities.add(new SimpleGrantedAuthority(roleWithPrefix));
+
+            return new User(user.getUsername(),
+                    user.getPassword(),
+                    authorities);
         };
     }
 }

@@ -56,25 +56,25 @@ public class AuthService {
             return new AuthResult(AuthEnum.INVALID, null, null, null);
         }
 
-        boolean isEmailAvailable = userService.existsByEmail(user.email());
-        if(isEmailAvailable){
+        boolean isNotEmailAvailable = userService.existsByEmail(user.email());
+        if(isNotEmailAvailable){
             return new AuthResult(AuthEnum.EMAIL_TAKEN, null, null, null);
         }
 
-        boolean isUserAvailable = userService.existsByUsername(user.username());
-        if(isUserAvailable){
+        boolean isNotUserAvailable = userService.existsByUsername(user.username());
+        if(isNotUserAvailable){
             return new AuthResult(AuthEnum.USERNAME_TAKEN, null, null, null);
         }
 
         String hashPassword = passwordEncoder.encode(user.password());
-        AppUser newUser = new AppUser(user.username(), user.email(), hashPassword);
+        AppUser newUser = new AppUser(user.email(), user.username(), hashPassword);
 
         AppUser returnUser = authRepo.save(newUser);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", returnUser.getId());
         claims.put("username", returnUser.getUsername());
-        var token = jwtTokenUtil.generateToken(returnUser.getEmail(), claims);
+        var token = jwtTokenUtil.generateToken(returnUser.getUsername(), claims);
 
         return new AuthResult(AuthEnum.CREATED, user, token, returnUser);
     }
@@ -95,17 +95,28 @@ public class AuthService {
 
         Optional<AppUser> optionalAppUser = userService.findAppUserByEmail(user.email());
         if(optionalAppUser.isEmpty()){
-            return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null, null);
+            if(user.username() == null || user.username().isEmpty()){
+                return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null, null);
+            }
+
+            if(!RegisterRequirementsUtils.isValidUsername(user.username())){
+                optionalAppUser = userService.findByUsername(user.username());
+            }
+
+            if(optionalAppUser.isEmpty()){
+                return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null, null);
+            }
         }
 
         AppUser checkUser = optionalAppUser.get();
-        if(!passwordEncoder.matches(user.email(), checkUser.getPassword())){
+        if(!passwordEncoder.matches(user.password(), checkUser.getPassword())){
             return new AuthResult(AuthEnum.INVALID_CREDENTIALS, user, null, null);
         }
 
-        Map<String, Object> claims = Map.of("userId", checkUser.getId());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", checkUser.getId());
         claims.put("username", checkUser.getUsername());
-        var token = jwtTokenUtil.generateToken(checkUser.getEmail(), claims);
+        var token = jwtTokenUtil.generateToken(checkUser.getUsername(), claims);
 
         return new AuthResult(AuthEnum.SUCCESS, user, token, checkUser);
     }

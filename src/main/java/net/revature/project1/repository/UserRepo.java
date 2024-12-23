@@ -23,7 +23,7 @@ public interface UserRepo extends JpaRepository<AppUser, Long> {
      * @param username Take in the username to be used for the search.
      * @return AppUser if it found something or empty if it didn't.
      */
-    AppUser findAppUserByUsername(String username);
+    Optional<AppUser> findAppUserByUsername(String username);
 
     /**
      * Used to check if the email exist or not already.

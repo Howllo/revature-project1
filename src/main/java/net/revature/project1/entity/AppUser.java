@@ -32,7 +32,9 @@ public class AppUser {
     private String bannerPic;
 
     private String biography;
-    private String role = "user";
+
+    @Column(name = "user_role")
+    private String userRole = "ROLE_USER";
 
     @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
@@ -104,7 +106,7 @@ public class AppUser {
     }
 
     public String getRole() {
-        return role;
+        return userRole;
     }
 
     public Timestamp getCreatedAt() {
