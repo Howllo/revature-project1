@@ -1,9 +1,6 @@
 package net.revature.project1.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +10,7 @@ import java.util.Set;
 public class Post {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -26,11 +23,8 @@ public class Post {
 
     private String comment;
 
-    @Column(name = "image_path")
-    private String imagePath;
-
-    @Column(name = "video_path")
-    private String videoPath;
+    @Column(name = "media")
+    private String media;
 
     @Column(name = "post_at", nullable = false)
     private Timestamp postAt;
@@ -54,11 +48,10 @@ public class Post {
         this.postAt = new Timestamp(System.currentTimeMillis());
     }
 
-    public Post(AppUser user, String comment, String imagePath, String videoPath) {
+    public Post(AppUser user, String comment, String media) {
         this.user = user;
         this.comment = comment;
-        this.imagePath = imagePath;
-        this.videoPath = videoPath;
+        this.media = media;
         this.postAt = new Timestamp(System.currentTimeMillis());
     }
 
@@ -78,12 +71,8 @@ public class Post {
         return comment;
     }
 
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public String getVideoPath() {
-        return videoPath;
+    public String getMedia() {
+        return media;
     }
 
     public Timestamp getPostAt() {
@@ -98,12 +87,8 @@ public class Post {
         return likes;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
-    public void setVideoPath(String videoPath) {
-        this.videoPath = videoPath;
+    public void setMedia(String media) {
+        this.media = media;
     }
 
     public void setComment(String comment) {
@@ -112,5 +97,9 @@ public class Post {
 
     public void setPostEdited(boolean postEdited) {
         this.postEdited = postEdited;
+    }
+
+    public void setPostAt(Timestamp postAt) {
+        this.postAt = postAt;
     }
 }

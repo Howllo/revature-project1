@@ -28,6 +28,11 @@ public class PostController {
         this.postService = postService;
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<PostResponseDto>> getAll(){
+        return ResponseEntity.ok(postService.getAllPosts());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PostSmallResponseDto> getPost(@PathVariable Long id){
         return ResponseEntity.ok(postService.getPost(id));

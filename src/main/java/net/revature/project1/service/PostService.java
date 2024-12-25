@@ -12,7 +12,9 @@ import net.revature.project1.result.PostResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,11 +23,43 @@ import java.util.Optional;
 public class PostService {
     final private PostRepo postRepo;
     final private UserService userService;
+    final private FileService fileService;
 
     @Autowired
-    public PostService(PostRepo postRepo, UserService userService) {
+    public PostService(PostRepo postRepo, UserService userService, FileService fileService) {
         this.postRepo = postRepo;
         this.userService = userService;
+        this.fileService = fileService;
+    }
+
+    // Good luck! I don't have Redis.
+    public List<PostResponseDto> getAllPosts() {
+        List<Post> getAll = postRepo.findAll();
+        List<PostResponseDto> posts = new ArrayList<>();
+        for (Post post : getAll) {
+            Long parentPost = 0L;
+
+            if(post.getPostParent() == null){
+                parentPost = -1L;
+            } else {
+                parentPost = post.getPostParent().getId();
+            }
+
+            posts.add(new PostResponseDto(
+                    post.getId(),
+                    parentPost,
+                    post.getUser().getId(),
+                    post.getUser().getUsername(),
+                    post.getUser().getDisplayName(),
+                    post.getComment(),
+                    post.getMedia(),
+                    post.isPostEdited(),
+                    post.getPostAt(),
+                    post.getLikes().size(),
+                    (long) post.getComment().length()
+            ));
+        }
+        return posts;
     }
 
     /**
@@ -70,15 +104,24 @@ public class PostService {
     */
     public PostResult createPost(Post post) {
 
-        if(post.getComment() == null && post.getImagePath() == null && post.getVideoPath() == null) {
+        if(post.getComment() == null && post.getMedia() == null) {
             return new PostResult(PostEnum.INVALID_POST, "Post must have a comment, " +
                  "image, or video.", null);
         }
 
-        if(post.getComment().length() > 255) {
+        if(post.getComment() != null && post.getComment().length() > 255) {
             return new PostResult(PostEnum.INVALID_COMMENT, "Comment is too long.", null);
         }
 
+        if(post.getMedia() != null && !post.getMedia().isEmpty() && !post.getMedia().contains("youtube")){
+            try{
+                fileService.createFile(post);
+            } catch (IOException e) {
+                return new PostResult(PostEnum.INVALID_POST, "File could not be created.", null);
+            }
+        }
+
+        post.setPostAt(Timestamp.from(Instant.now()));
         postRepo.save(post);
 
         return new PostResult(PostEnum.SUCCESS, null, getPostResponseDto(post));
@@ -104,8 +147,7 @@ public class PostService {
         }
 
         postToUpdate.setComment(post.getComment());
-        postToUpdate.setImagePath(post.getImagePath());
-        postToUpdate.setVideoPath(post.getVideoPath());
+        postToUpdate.setMedia(post.getMedia());
 
         if(Timestamp.valueOf(post.getPostAt().toLocalDateTime()).getTime() + 60001 < System.currentTimeMillis()) {
             postToUpdate.setPostEdited(true);
@@ -162,7 +204,7 @@ public class PostService {
      * @return The comments of the post.
      */
     public List<PostResponseDto> getComments(Long postId) {
-        return postRepo.findCommentsByPostId(postId);
+        return null;
     }
 
     /**
@@ -171,14 +213,19 @@ public class PostService {
      * @return The post response dto.
      */
     PostResponseDto getPostResponseDto(Post post) {
+        Long postParent = -1L;
+        if(post.getPostParent() != null) {
+            postParent = post.getPostParent().getId();
+        }
+
         return new PostResponseDto(
                 post.getId(),
-                post.getPostParent(),
+                postParent,
                 post.getUser().getId(),
                 post.getUser().getUsername(),
                 post.getUser().getDisplayName(),
-                post.getImagePath(),
-                post.getVideoPath(),
+                post.getComment(),
+                post.getMedia(),
                 post.isPostEdited(),
                 post.getPostAt(),
                 post.getLikes().size(),

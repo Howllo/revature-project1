@@ -215,7 +215,7 @@ public class UserService {
      * @return {@code UserEnum} is return depending on the status of the service.
      */
     public UserEnum updateProfilePictures(Long id, UserRequestPicDto responsePicDto){
-        String imagePath = "";
+        String imagePath;
 
         Optional<AppUser> userOptional = userRepo.findById(id);
         if(userOptional.isEmpty()){

@@ -1,5 +1,6 @@
 package net.revature.project1.service;
 
+import net.revature.project1.entity.Post;
 import net.revature.project1.enumerator.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class FileService {
@@ -64,7 +67,9 @@ public class FileService {
             case IMAGE:
                 allowedTypes = allowedImageTypes;
                 resourceLocation = fileLocation.get(1);
-                toPath = Paths.get(resourcePath + resourceLocation + "/" + fileName);
+                toPath = Paths.get(resourcePath)
+                        .resolve(resourceLocation)
+                        .resolve(fileName);
 
                 if (!allowedImageTypes.contains(mimeType)) {
                     logger.warn("Unsupported image type: {}", mimeType);
@@ -80,7 +85,10 @@ public class FileService {
             case VIDEO:
                 allowedTypes = allowedVideoTypes;
                 resourceLocation = fileLocation.getFirst();
-                toPath = Paths.get(resourcePath + resourceLocation + "/" + fileName);
+                toPath = Paths.get(resourcePath)
+                        .resolve(resourceLocation)
+                        .resolve(fileName);
+
 
                 if (!allowedVideoTypes.contains(mimeType)) {
                     logger.warn("Unsupported video type: {}", mimeType);
@@ -102,6 +110,52 @@ public class FileService {
 
         Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
 
-        return fileResourceUrl + resourceLocation + "/" + fileName;
+        return buildResourceUrl(resourceLocation, fileName);
+    }
+
+    /**
+     * Used to remove anything that does belong in the URL from entering the database.
+     * @param resourceLocation Take in the location of the current resource.
+     * @param fileName Take in the file name
+     * @return Returns the URL
+     */
+    private String buildResourceUrl(String resourceLocation, String fileName) {
+        resourceLocation = resourceLocation.replace("\"", "").trim();
+        fileName = fileName.replace("\"", "").trim();
+        return String.format("%s%s/%s", fileResourceUrl, resourceLocation, fileName);
+    }
+
+    /**
+     * Create a new file and a temporary file based on a base64 encoding.
+     * @param post Take in the post to set the new media URL.
+     * @throws IOException If it fails to create a file it throws the exception.
+     */
+    void createFile(Post post) throws IOException {
+        String base64Image = post.getMedia();
+        String[] parts = base64Image.split(",");
+        String imageType = parts[0].split(";")[0].split(":")[1];
+        byte[] imageBytes = Base64.getDecoder().decode(parts[1]);
+
+        String extension = getExtensionFromMimeType(imageType);
+        String tempFileName = UUID.randomUUID() + "." + extension;
+
+        Path tempPath = Paths.get(System.getProperty("java.io.tmpdir"), tempFileName);
+        Files.write(tempPath, imageBytes);
+        FileType fileType = imageType.startsWith("video/") ? FileType.VIDEO : FileType.IMAGE;
+
+        String mediaUrl = uploadFile(fileType, tempPath.toString(), tempFileName);
+        post.setMedia(mediaUrl);
+
+        Files.deleteIfExists(tempPath);
+    }
+
+    private String getExtensionFromMimeType(String mimeType) {
+        return switch (mimeType) {
+            case "image/jpeg" -> "jpg";
+            case "image/png" -> "png";
+            case "image/gif" -> "gif";
+            case "video/mp4" -> "mp4";
+            default -> "jpg";  // Default to jpg if unknown
+        };
     }
 }

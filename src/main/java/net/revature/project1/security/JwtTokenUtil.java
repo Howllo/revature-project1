@@ -1,13 +1,12 @@
 package net.revature.project1.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.SignatureException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
@@ -16,13 +15,14 @@ import java.util.function.Function;
 @Component
 public class JwtTokenUtil {
     private final SecretKey secretKey;
+    private final JwtParser jwtParser;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration:86400}")
     private Long expiration;
 
-    @Autowired
     public JwtTokenUtil(SecretKey secretKey) {
         this.secretKey = secretKey;
+        this.jwtParser = Jwts.parser().verifyWith(secretKey).build();
     }
 
     public String generateToken(String userName, Map<String, Object> claims) {
@@ -36,15 +36,11 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    public Boolean validateToken(String token, String username) throws SignatureException {
+    public Boolean validateToken(String token, String username) {
         try {
-            Claims claims = getAllClaimsFromToken(token);
-            String tokenUsername = claims.getSubject();
-            Date expiration = claims.getExpiration();
-
-            return tokenUsername.equals(username) && !expiration.before(new Date());
+            String tokenUsername = getUsernameFromToken(token);
+            return (tokenUsername.equals(username) && !isTokenExpired(token));
         } catch (Exception e) {
-            System.out.println("Token validation failed: " + e.getMessage());
             return false;
         }
     }
@@ -63,11 +59,7 @@ public class JwtTokenUtil {
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return jwtParser.parseSignedClaims(token).getPayload();
     }
 
     public Boolean isTokenExpired(String token) {

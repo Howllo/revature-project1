@@ -15,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.SignatureException;
-
 @CrossOrigin(origins = "http://localhost:5173/")
 @RestController
 @RequestMapping("api/v1/auth")
@@ -40,6 +38,7 @@ public class AuthController {
         return switch (result.getResult()) {
             case CREATED, SUCCESS -> ResponseEntity.status(HttpStatus.CREATED)
                     .body(new AuthResponseDto("Successfully created a account.",
+                            returnedUser.getId(),
                             returnedUser.getUsername(),
                             null,
                             returnedUser.getProfilePic(),
@@ -66,6 +65,7 @@ public class AuthController {
         return switch(result) {
             case CREATED, SUCCESS -> ResponseEntity.status(HttpStatus.OK)
                         .body(new AuthResponseDto("Login successful!",
+                                returnUser.getId(),
                                 returnUser.getUsername(),
                                 returnUser.getDisplayName(),
                                 returnUser.getProfilePic(),
@@ -115,7 +115,7 @@ public class AuthController {
                 return ResponseEntity.badRequest().body("Bad Request: Token is invalid.");
             }
             return ResponseEntity.ok("Success: Token verified.");
-        } catch (SignatureException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error -" +
                     " An unexpected error occurred on the server. Please try again later");
         }
