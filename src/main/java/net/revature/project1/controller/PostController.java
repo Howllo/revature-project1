@@ -1,14 +1,12 @@
 package net.revature.project1.controller;
 
 import jakarta.servlet.http.HttpSession;
-import net.revature.project1.dto.PostFeedRequest;
-import net.revature.project1.dto.PostFeedResponse;
-import net.revature.project1.dto.PostResponseDto;
-import net.revature.project1.dto.PostSmallResponseDto;
+import net.revature.project1.dto.*;
 import net.revature.project1.entity.Post;
 import net.revature.project1.enumerator.PostEnum;
 import net.revature.project1.result.PostResult;
 import net.revature.project1.service.PostService;
+import net.revature.project1.utils.ResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,60 +49,54 @@ public class PostController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createPost(@RequestBody Post post){
-        PostResult postResult = postService.createPost(post);
+    public ResponseEntity<?> createPost(@RequestBody Post post,
+                                        @RequestHeader("Authorization") String token){
+        PostResult postResult = postService.createPost(post, token.substring(7));
         PostEnum result = postResult.postEnum();
-
-        return switch(result){
-            case SUCCESS -> ResponseEntity.ok(postResult.post());
-            case INVALID_POST, INVALID_USER, INVALID_COMMENT -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(postResult.message());
-            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(postResult.message());
-        };
+        return ResponseHandler.returnType(result, postResult.post());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePost(@PathVariable Long id, @RequestBody Post post){
-        PostResult postResult = postService.updatePost(id, post);
+    public ResponseEntity<?> updatePost(@PathVariable Long id, @RequestBody PostUpdateDto post,
+                                        @RequestHeader("Authorization") String token){
+        PostResult postResult = postService.updatePost(id, post, token);
         PostEnum result = postResult.postEnum();
-
-        return switch(result){
-            case SUCCESS -> ResponseEntity.ok(postResult.post());
-            case INVALID_POST, INVALID_USER, INVALID_COMMENT -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(postResult.message());
-            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(postResult.message());
-        };
+        return ResponseHandler.returnType(result, postResult.post());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePost(@PathVariable Long id){
-        PostEnum result = postService.deletePost(id);
-
-        return switch(result){
-            case SUCCESS -> ResponseEntity.ok("Successfully deleted post.");
-            case INVALID_POST, INVALID_USER, INVALID_COMMENT -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid post.");
-            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Internal Server Error - An unexpected error occurred on the server. " +
-                            "Please try again later");
-        };
+    public ResponseEntity<?> deletePost(@PathVariable Long id,
+                                             @RequestHeader("Authorization") String token){
+        PostEnum result = postService.deletePost(id, token.substring(7));
+        return ResponseHandler.returnType(result, null);
     }
 
     @PostMapping("/{id}/like/{userId}")
-    public ResponseEntity<String> likePost(@PathVariable Long id,
-                                           @PathVariable Long userId){
-        PostEnum result = postService.likePost(id, userId);
+    public ResponseEntity<?> likePost(@PathVariable Long id,
+                                           @PathVariable Long userId,
+                                           @RequestHeader("Authorization") String token){
+        if(id.equals(userId)){
+            return ResponseEntity.badRequest().body("You are not allowed to like your own post.");
+        }
 
-        return switch(result){
-            case SUCCESS -> ResponseEntity.ok("Successfully liked post.");
-            case INVALID_POST, INVALID_USER, INVALID_COMMENT -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid post.");
-            case UNAUTHORIZED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Internal Server Error - An unexpected error occurred on the server. " +
-                            "Please try again later");
-        };
+        PostEnum result = postService.likePost(id, userId, token.substring(7));
+        return ResponseHandler.returnType(result, null);
+    }
+
+    @GetMapping("{id}/likes")
+    public ResponseEntity<Integer> returnTotalLikes(@PathVariable Long id){
+        Integer result = postService.returnTotalLikes(id);
+        if(result == null){
+            return ResponseEntity.badRequest().body(-1);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/check/{postId}/like/{user}")
+    public ResponseEntity<?> checkLike(@PathVariable Long postId,
+                                       @PathVariable Long user,
+                                       @RequestHeader("Authorization") String token){
+        return ResponseEntity.ok(postService.doesUserLikeThisPost(postId, user, token.substring(7)));
     }
 }
 

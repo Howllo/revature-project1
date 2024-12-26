@@ -107,22 +107,9 @@ public class FileService {
         }
 
         Files.createDirectories(toPath.getParent());
-
         Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
-
-        return buildResourceUrl(resourceLocation, fileName);
-    }
-
-    /**
-     * Used to remove anything that does belong in the URL from entering the database.
-     * @param resourceLocation Take in the location of the current resource.
-     * @param fileName Take in the file name
-     * @return Returns the URL
-     */
-    private String buildResourceUrl(String resourceLocation, String fileName) {
-        resourceLocation = resourceLocation.replace("\"", "").trim();
-        fileName = fileName.replace("\"", "").trim();
-        return String.format("%s%s/%s", fileResourceUrl, resourceLocation, fileName);
+        String url = fileResourceUrl + resourceLocation + "/" + fileName;
+        return url.replace("\"", "");
     }
 
     /**

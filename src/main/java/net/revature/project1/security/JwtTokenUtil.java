@@ -29,7 +29,7 @@ public class JwtTokenUtil {
         return Jwts.builder()
                 .subject(userName)
                 .claims(claims)
-                .issuer("project1")
+                .issuer("revature")
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plusSeconds(expiration)))
                 .signWith(secretKey)
